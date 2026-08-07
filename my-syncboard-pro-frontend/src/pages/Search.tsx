@@ -1,9 +1,8 @@
 // Search.tsx
-// Full search page: debounced query -> /api/search -> grouped, clickable results.
-
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ListTodo, Rocket, BookOpen, Users, AlertCircle, Search as SearchIcon, X, Filter } from "lucide-react";
+import { useAppSelector } from "../hooks/storeHooks"; // 1. Imported your Redux hook
 
 import SkeletonLoader from "../components/Search/SkeletonLoader";
 import ResultSection from "../components/Search/ResultSection";
@@ -15,25 +14,28 @@ import type {
   IssueResult,
   MemberResult,
 } from "../types/search.types";
+import axiosInstance from "../api/axiosInstance";
+import axios from "axios";
 
-// Pass the active project id in from context/router params, e.g.
-// const { projectId } = useParams();
 interface SearchProps {
   projectId: string;
 }
+
+// Added strict type for the filters to remove the 'any' cast later
+type FilterType = "all" | "tasks" | "stories" | "sprints" | "issues" | "members";
 
 export default function Search({ projectId }: SearchProps) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResults | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [filterType, setFilterType] = useState<"all" | "tasks" | "stories" | "sprints" | "issues" | "members">("all");
+  const [filterType, setFilterType] = useState<FilterType>("all");
 
   const navigate = useNavigate();
   const abortRef = useRef<AbortController | null>(null);
+   
 
   useEffect(() => {
-    // Clear everything if the query is too short to search on.
     if (query.trim().length < 2) {
       setResults(null);
       setLoading(false);
@@ -45,33 +47,37 @@ export default function Search({ projectId }: SearchProps) {
     setError(null);
 
     const timer = setTimeout(async () => {
-      // Cancel any in-flight request before starting a new one, so a slow
-      // earlier response can't overwrite a newer one.
       abortRef.current?.abort();
       const controller = new AbortController();
       abortRef.current = controller;
 
       try {
-        const res = await fetch(
-          `/api/projects/${projectId}/search?q=${encodeURIComponent(query)}&type=${filterType}`,
-          { signal: controller.signal }
-        );
-        if (!res.ok) throw new Error(`Search failed (${res.status})`);
-        const data: SearchResults = await res.json();
-        setResults(data);
-      } catch (err) {
-        if ((err as Error).name !== "AbortError") {
-          setError("Something went wrong while searching. Please try again.");
+      // ✨ Using your axiosInstance instead of fetch
+      const response = await axiosInstance.get(
+        `/projects/${projectId}/search?q=${encodeURIComponent(query)}&type=${filterType}`,
+        { 
+          signal: controller.signal // Passes the abort signal to Axios
         }
+      );
+      
+      // Axios automatically parses the JSON and throws on bad status codes
+      setResults(response.data);
+      } catch (err) {
+        if (axios.isCancel(err) || (err as Error).name === "CanceledError") {
+          return; 
+        }
+        
+        console.error("Search API Error:", err);
+        setError("Something went wrong while searching. Please try again.");
       } finally {
         setLoading(false);
       }
-    }, 300); // debounce
+    }, 300);
 
     return () => {
       clearTimeout(timer);
     };
-  }, [query, projectId, filterType]);
+  }, [query, projectId, filterType]); // Added token to dependency array
 
   const hasNoResults =
     results &&
@@ -111,10 +117,10 @@ export default function Search({ projectId }: SearchProps) {
       {query.trim().length >= 2 && (
         <div className="flex items-center gap-2 mb-4 overflow-x-auto pb-2">
           <Filter size={16} className="text-gray-400 shrink-0" />
-          {["all", "tasks", "stories", "sprints", "issues", "members"].map((type) => (
+          {(["all", "tasks", "stories", "sprints", "issues", "members"] as FilterType[]).map((type) => (
             <button
               key={type}
-              onClick={() => setFilterType(type as any)}
+              onClick={() => setFilterType(type)} // Removed 'as any' cast
               className={`px-3 py-1.5 rounded-full text-xs font-medium capitalize transition-colors shrink-0 ${
                 filterType === type
                   ? "bg-indigo-100 text-indigo-700 border border-indigo-200"
@@ -152,7 +158,7 @@ export default function Search({ projectId }: SearchProps) {
               secondaryText: t.assignee?.name || t.status,
               status: t.status,
             }))}
-            onItemClick={(item) => navigate(`/task/${item._id}`)}
+            onItemClick={(item) => navigate(`/projects/${projectId}/task/${item._id}`)}
           />
 
           <ResultSection
@@ -165,7 +171,7 @@ export default function Search({ projectId }: SearchProps) {
               secondaryText: s.goal || s.status,
               status: s.status,
             }))}
-            onItemClick={(item) => navigate(`/sprint/${item._id}`)}
+            onItemClick={(item) => navigate(`/projects/${projectId}/sprint/${item._id}`)}
           />
 
           <ResultSection
@@ -178,7 +184,7 @@ export default function Search({ projectId }: SearchProps) {
               secondaryText: s.points ? `${s.points} points` : s.status,
               status: s.status,
             }))}
-            onItemClick={(item) => navigate(`/story/${item._id}`)}
+            onItemClick={(item) => navigate(`/projects/${projectId}/story/${item._id}`)}
           />
 
           <ResultSection
@@ -191,7 +197,7 @@ export default function Search({ projectId }: SearchProps) {
               secondaryText: i.type || i.priority,
               status: i.status,
             }))}
-            onItemClick={(item) => navigate(`/issue/${item._id}`)}
+            onItemClick={(item) => navigate(`/projects/${projectId}/issue/${item._id}`)}
           />
 
           <ResultSection
@@ -203,7 +209,7 @@ export default function Search({ projectId }: SearchProps) {
               primaryText: m.name,
               secondaryText: m.email || m.role,
             }))}
-            onItemClick={(item) => navigate(`/member/${item._id}`)}
+            onItemClick={(item) => navigate(`/projects/${projectId}/team/${item._id}`)}
           />
         </>
       )}

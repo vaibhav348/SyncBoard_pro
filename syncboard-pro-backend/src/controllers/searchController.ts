@@ -1,6 +1,3 @@
-// controllers/search.controller.ts
-
-/// <reference path="../global.d.ts" />
 
 import { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
@@ -16,8 +13,6 @@ const DEFAULT_LIMIT = 8;
 const MAX_LIMIT = 20;
 const MIN_QUERY_LENGTH = 2;
 
-// type=all|tasks|stories|sprints|issues|members lets the frontend ask for
-// just one section (e.g. when a filter chip is clicked).
 const VALID_TYPES = ["all", "tasks", "stories", "sprints", "issues", "members"] as const;
 type SearchType = (typeof VALID_TYPES)[number];
 
@@ -27,8 +22,6 @@ interface ProjectFilter {
 
 export async function search(req: Request, res: Response, next: NextFunction): Promise<void> {
   try {
-    // projectId comes straight from the route param (/:projectId/search),
-    // no req.projectId needed.
     const { projectId } = req.params;
     const projectIdString = Array.isArray(projectId) ? projectId[0] : projectId;
 
@@ -48,7 +41,7 @@ export async function search(req: Request, res: Response, next: NextFunction): P
       return;
     }
 
-    const pattern = new RegExp(escapeRegex(rawQuery), "i"); // case-insensitive partial match
+    const pattern = new RegExp(escapeRegex(rawQuery), "i"); 
     const projectFilter: ProjectFilter = { project: new mongoose.Types.ObjectId(projectIdString) };
 
     const wantsAll = type === "all";
@@ -74,11 +67,6 @@ export async function search(req: Request, res: Response, next: NextFunction): P
     next(err);
   }
 }
-
-// --- Per-entity search functions -------------------------------------
-// No FilterQuery cast needed — TypeScript infers the filter type from
-// each model automatically, and RegExp is a valid match value for string
-// schema paths out of the box.
 
 function searchTasks(projectFilter: ProjectFilter, pattern: RegExp, limit: number) {
   return Task.find({
@@ -126,9 +114,6 @@ function searchIssues(projectFilter: ProjectFilter, pattern: RegExp, limit: numb
     .lean();
 }
 
-// Team members live in project.members (array of User ObjectIds), so we
-// look up the project first, then match users within that list by
-// name/email — keeping results scoped to people on this project.
 async function searchMembers(projectId: string, pattern: RegExp, limit: number) {
   const project = await Project.findById(projectId).select("members").lean();
   if (!project || !project.members?.length) return [];
