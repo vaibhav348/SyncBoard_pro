@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const authMiddleware_1 = require("../middlewares/authMiddleware");
+const rbacMiddleware_1 = require("../middlewares/rbacMiddleware");
+const sprintController_1 = require("../controllers/sprintController");
+const sprintRoutes = (0, express_1.Router)();
+sprintRoutes.post('/create', authMiddleware_1.protect, (0, rbacMiddleware_1.authorize)('sprint.create'), sprintController_1.createSprint);
+sprintRoutes.get('/get_all/:projectId', authMiddleware_1.protect, sprintController_1.getAllSprints);
+sprintRoutes.get('/:sprintId/summary', authMiddleware_1.protect, sprintController_1.getSprintSummary);
+sprintRoutes.patch('/update/:sprintId', authMiddleware_1.protect, (0, rbacMiddleware_1.authorize)('sprint.manage'), sprintController_1.updateSprint);
+sprintRoutes.put('/update/:sprintId', authMiddleware_1.protect, (0, rbacMiddleware_1.authorize)('sprint.manage'), sprintController_1.updateSprint);
+sprintRoutes.patch('/start/:sprintId', authMiddleware_1.protect, (0, rbacMiddleware_1.authorize)('sprint.manage'), sprintController_1.startSprint);
+sprintRoutes.put('/start/:sprintId', authMiddleware_1.protect, (0, rbacMiddleware_1.authorize)('sprint.manage'), sprintController_1.startSprint);
+sprintRoutes.patch('/complete/:sprintId', authMiddleware_1.protect, (0, rbacMiddleware_1.authorize)('sprint.manage'), sprintController_1.completeSprint);
+sprintRoutes.put('/complete/:sprintId', authMiddleware_1.protect, (0, rbacMiddleware_1.authorize)('sprint.manage'), sprintController_1.completeSprint);
+exports.default = sprintRoutes;

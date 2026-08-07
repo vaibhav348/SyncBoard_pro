@@ -1,0 +1,18 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const issueController_1 = require("../controllers/issueController");
+const authMiddleware_1 = require("../middlewares/authMiddleware");
+const issueRoutes = (0, express_1.Router)();
+issueRoutes.post('/create', authMiddleware_1.protect, issueController_1.createIssue);
+issueRoutes.get('/get_all_issue/:projectId', authMiddleware_1.protect, issueController_1.getProjectIssues);
+issueRoutes.get('/:issueId', authMiddleware_1.protect, issueController_1.getIssueById);
+issueRoutes.patch('/update_issue/:issueId', authMiddleware_1.protect, issueController_1.updateIssue);
+issueRoutes.delete('/delete/:issueId', authMiddleware_1.protect, issueController_1.deleteIssue);
+issueRoutes.post('/:issueId/comments', authMiddleware_1.protect, issueController_1.addCommentToIssue);
+issueRoutes.get('/:issueId/comments', authMiddleware_1.protect, issueController_1.getIssueComments);
+issueRoutes.patch('/:issueId/comments/:commentId', authMiddleware_1.protect, issueController_1.updateIssueComment);
+issueRoutes.delete('/:issueId/comments/:commentId', authMiddleware_1.protect, issueController_1.deleteIssueComment);
+issueRoutes.get("/get_by_task/:taskId", authMiddleware_1.protect, issueController_1.getIssuesByTask);
+issueRoutes.get("/get_by_sprint/:sprintId", authMiddleware_1.protect, issueController_1.getIssuesBySprint);
+exports.default = issueRoutes;

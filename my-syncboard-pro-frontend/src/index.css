@@ -1,0 +1,87 @@
+@import "tailwindcss";
+
+/* 🚀 STEP 1: Minimalist Design Tokens */
+@theme {
+  --color-text: #27272a;       /* Zinc 800 - Readability */
+  --color-text-h: #09090b;     /* Zinc 950 - Sharp Headings */
+  --color-bg: #ffffff;         /* Clean White */
+  --color-border: #e4e4e7;     /* Zinc 200 - Very subtle line */
+  --color-accent: #18181b;     /* Pure Dark Accents instead of screaming purple */
+  --color-accent-bg: #f4f4f5;  /* Zinc 100 - Flat background hover */
+  
+  --font-sans: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+/* 🌙 STEP 2: Minimalist Dark Theme Mappings */
+@media (prefers-color-scheme: dark) {
+  @theme {
+    --color-text: #d4d4d8;     /* Zinc 300 */
+    --color-text-h: #fafafa;   /* Zinc 50 */
+    --color-bg: #09090b;       /* Zinc 950 - Absolute Dark */
+    --color-border: #27272a;   /* Zinc 800 */
+    --color-accent: #ffffff;
+    --color-accent-bg: #18181b; /* Zinc 900 */
+  }
+}
+
+/* 🌐 STEP 3: Global Base Normalizations */
+@layer base {
+  :root {
+    font-family: var(--font-sans);
+    color-scheme: light dark;
+    color: var(--color-text);
+    background-color: var(--color-bg);
+    -webkit-font-smoothing: antialiased;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    margin: 0;
+    padding: 0;
+    line-height: 1.5;
+  }
+
+  /* No forced margins, completely fluid styling */
+  h1, h2, h3, h4, h5, h6 {
+    color: var(--color-text-h);
+    font-weight: 600;
+    margin: 0;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  code {
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    padding: 0.2rem 0.4rem;
+    background-color: var(--color-accent-bg);
+    border-radius: 4px;
+  }
+   a, button {
+    outline-color: var(--color-accent);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--color-accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+/* 🏗️ STEP 4: Reset Global Container to Be Fluid */
+#root {
+  height: 100svh;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+  overflow: hidden;
+}

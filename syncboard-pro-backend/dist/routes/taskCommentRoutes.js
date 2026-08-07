@@ -1,0 +1,11 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const authMiddleware_1 = require("../middlewares/authMiddleware");
+const taskCommentController_1 = require("../controllers/taskCommentController");
+const taskCommentRoutes = (0, express_1.Router)();
+taskCommentRoutes.post("/create", authMiddleware_1.protect, taskCommentController_1.createTaskComment);
+taskCommentRoutes.get("/get_by_task/:taskId", authMiddleware_1.protect, taskCommentController_1.getTaskComments);
+taskCommentRoutes.patch("/update/:commentId", authMiddleware_1.protect, taskCommentController_1.updateTaskComment);
+taskCommentRoutes.delete("/delete/:commentId", authMiddleware_1.protect, taskCommentController_1.deleteTaskComment);
+exports.default = taskCommentRoutes;

@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const authController_1 = require("../controllers/authController");
+const inviteController_1 = require("../controllers/inviteController");
+const authMiddleware_1 = require("../middlewares/authMiddleware");
+const authRoutes = (0, express_1.Router)();
+authRoutes.post('/register', authController_1.registerUser);
+authRoutes.post('/login', authController_1.LoginUser);
+authRoutes.post('/invite', authMiddleware_1.protect, inviteController_1.sendInvite);
+authRoutes.get('/invite', authMiddleware_1.protect, inviteController_1.getInvitation);
+authRoutes.get('/verify-invite', authController_1.verifyInviteToken);
+authRoutes.put('/update-profile', authMiddleware_1.protect, authController_1.updateProfile);
+authRoutes.get('/users', authMiddleware_1.protect, authController_1.getAllUsers);
+exports.default = authRoutes;

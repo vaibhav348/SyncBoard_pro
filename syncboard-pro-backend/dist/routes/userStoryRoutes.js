@@ -1,0 +1,15 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const authMiddleware_1 = require("../middlewares/authMiddleware");
+const rbacMiddleware_1 = require("../middlewares/rbacMiddleware");
+const userStoryController_1 = require("../controllers/userStoryController");
+const userStoryRoutes = (0, express_1.Router)();
+userStoryRoutes.post("/create", authMiddleware_1.protect, (0, rbacMiddleware_1.authorize)('story.create'), userStoryController_1.createStory);
+userStoryRoutes.get("/get_backlog/:projectId", authMiddleware_1.protect, userStoryController_1.getBacklogStories);
+userStoryRoutes.get("/get_by_sprint/:sprintId", authMiddleware_1.protect, userStoryController_1.getStoriesBySprint);
+userStoryRoutes.get("/get_by_id/:storyId", authMiddleware_1.protect, userStoryController_1.getStoryById);
+userStoryRoutes.patch("/update/:storyId", authMiddleware_1.protect, (0, rbacMiddleware_1.authorize)('story.edit'), userStoryController_1.updateStory);
+userStoryRoutes.put("/move_to_sprint/:storyId", authMiddleware_1.protect, (0, rbacMiddleware_1.authorize)('task.move'), userStoryController_1.moveStoryToSprint);
+userStoryRoutes.delete("/delete/:storyId", authMiddleware_1.protect, (0, rbacMiddleware_1.authorize)('story.delete'), userStoryController_1.deleteStory);
+exports.default = userStoryRoutes;
