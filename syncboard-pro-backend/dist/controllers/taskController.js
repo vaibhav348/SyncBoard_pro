@@ -21,7 +21,7 @@ const UpdateTaskSchema = zod_1.default.object({
     title: zod_1.default.string().optional(),
     description: zod_1.default.string().optional(),
     status: zod_1.default.enum(["Todo", "In-Progress", "Review", "Done"]).optional(),
-    priority: zod_1.default.enum(["Low", "Medium", "High", "Critical"]).optional(),
+    priority: zod_1.default.enum(["Low", "Medium", "High"]).optional(), // TaskSchema me Critical nahi h
     assignedTo: zod_1.default.string().nullable().optional(),
     position: zod_1.default.number().optional(),
     storyId: zod_1.default.string().optional(),
@@ -60,6 +60,7 @@ const createTask = async (req, res) => {
             position: taskCount,
             status: "Todo"
         });
+        await newTask.populate("createdBy", "name email role");
         await newTask.populate("assignedTo", "name email role");
         return res.status(201).json({ message: "Task create successfully", task: newTask });
     }
@@ -124,6 +125,9 @@ const updateTask = async (req, res) => {
     try {
         const user = req.user;
         const taskId = req.params.taskId;
+        if (!mongoose_1.default.Types.ObjectId.isValid(taskId)) {
+            return res.status(400).json({ message: "Invalid Task ID format" });
+        }
         const validation = UpdateTaskSchema.safeParse(req.body);
         if (!validation.success)
             return res.status(400).json({ errors: validation.error.issues });
@@ -149,24 +153,29 @@ const updateTask = async (req, res) => {
         }
         const updateData = { ...validation.data };
         if (updateData.assignedTo) {
+            if (!mongoose_1.default.Types.ObjectId.isValid(updateData.assignedTo)) {
+                return res.status(400).json({ message: "Invalid assignedTo User ID format" });
+            }
             updateData.assignedTo = new mongoose_1.default.Types.ObjectId(updateData.assignedTo);
         }
         if (updateData.storyId) {
+            if (!mongoose_1.default.Types.ObjectId.isValid(updateData.storyId)) {
+                return res.status(400).json({ message: "Invalid Story ID format" });
+            }
             const newStory = await UserStory_1.default.findById(updateData.storyId);
             if (!newStory)
                 return res.status(404).json({ message: "Target story not found" });
             updateData.storyId = newStory._id;
-            updateData.sprintId = newStory.sprintId; // consistency maintain karne ke liye
-            // 🆕 Agar frontend ne position nahi bheja, to task ko target story ke end me daal do
+            updateData.sprintId = newStory.sprintId;
             if (updateData.position === undefined) {
                 const taskCountInTargetStory = await Task_1.default.countDocuments({ storyId: newStory._id });
                 updateData.position = taskCountInTargetStory;
             }
         }
-        const updatedTask = await Task_1.default.findByIdAndUpdate(taskId, { $set: updateData }, { new: true }).populate("assignedTo", "name email role");
-        if (updateData.assignedTo && updatedTask) {
-            await updatedTask.populate("assignedTo", "name email role");
-        }
+        // Single query with populate (Redundant second populate removed)
+        const updatedTask = await Task_1.default.findByIdAndUpdate(taskId, { $set: updateData }, { new: true, runValidators: true })
+            .populate("assignedTo", "name email role")
+            .populate("createdBy", "name email role");
         return res.status(200).json({ message: "Task updated successfully", task: updatedTask });
     }
     catch (error) {

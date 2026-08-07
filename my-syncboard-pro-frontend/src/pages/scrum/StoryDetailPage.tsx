@@ -133,7 +133,6 @@ export const StoryDetailPage = () => {
 
     const canEditAll = hasPermission(['story.edit', 'task.edit']) && canEditStory(currentUser as any);
     const canDelete = hasPermission('story.delete') && canDeleteStory(currentUser as any);
-    const canCreateTask = hasPermission('task.create');
 
     const reduxStory: IUserStoryData | undefined = useMemo(() => {
         const inBacklog = (backlogStories as IUserStoryData[]).find((s) => s._id === storyId);

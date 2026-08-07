@@ -8,5 +8,6 @@ projectRoutes.post('/create', protect, createProject)
 projectRoutes.get('/get', protect, getCompanyProject)
 projectRoutes.post('/:id/members', protect, addProjectMember)
 projectRoutes.get('/:id', protect, getProjectWithTeam)
+projectRoutes.get('/:id', protect, getProjectWithTeam)
 
 export default projectRoutes

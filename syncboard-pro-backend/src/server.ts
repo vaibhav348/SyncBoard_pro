@@ -12,6 +12,7 @@ import userStoryRoutes from './routes/userStoryRoutes';
 import taskRoutes from './routes/taskRoutes';
 import taskCommentRoutes from './routes/taskCommentRoutes';
 import storyCommentRoutes from './routes/storyCommentRoutes';
+import searchRoutes from './routes/searchRoutes';
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ app.use('/api/project', projectRoutes);
 app.use('/api/issue', issueRoutes);
 app.use('/api/sprint', sprintRoutes);
 app.use('/api/story', userStoryRoutes);
+app.use("/api/projects", searchRoutes);
 app.use('/api/task', taskRoutes);
 app.use('/api/task-comment', taskCommentRoutes);
 app.use('/api/story-comment', storyCommentRoutes);

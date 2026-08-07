@@ -1,3 +1,5 @@
+/// <reference path="../global.d.ts" />
+
 import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
@@ -9,7 +11,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
 
             const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
 
-            (req as any).user = decoded;
+            req.user = decoded as any;
 
             return next();
         } catch (error) {

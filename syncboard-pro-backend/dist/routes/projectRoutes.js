@@ -8,4 +8,5 @@ projectRoutes.post('/create', authMiddleware_1.protect, projectController_1.crea
 projectRoutes.get('/get', authMiddleware_1.protect, projectController_1.getCompanyProject);
 projectRoutes.post('/:id/members', authMiddleware_1.protect, projectController_1.addProjectMember);
 projectRoutes.get('/:id', authMiddleware_1.protect, projectController_1.getProjectWithTeam);
+projectRoutes.get('/:id', authMiddleware_1.protect, projectController_1.getProjectWithTeam);
 exports.default = projectRoutes;

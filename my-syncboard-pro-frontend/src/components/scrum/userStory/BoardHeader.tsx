@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import {
   CalendarDays, Plus, Search, SlidersHorizontal, Target,
-  Play, CheckCircle2, Settings2, AlertTriangle,
+  Play, CheckCircle2, AlertTriangle,
   Edit,
 } from 'lucide-react';
 import type { ISprint } from '../../../types/scrum.types';

@@ -58,6 +58,7 @@ const createStory = async (req, res) => {
             assignee: assignee || null,
             createdBy: user.id ? new mongoose_1.default.Types.ObjectId(user.id) : undefined
         });
+        await newStory.populate('assignee', 'name email avatar');
         return res.status(200).json({ message: "userStory created successfully", story: newStory });
     }
     catch (error) {

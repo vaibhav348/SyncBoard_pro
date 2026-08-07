@@ -1,15 +1,16 @@
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
-import { NotebookPen, Search } from 'lucide-react';
+import { NotebookPen } from 'lucide-react';
 import { useAppSelector } from '../hooks/storeHooks';
 import HomePage from '../pages/HomePage';
 import AuthPage from '../pages/AuthPage.tsx';
 import Dashboard from '../pages/app/Dashboard.tsx';
 import { AppLayout } from '../layouts/AppLayout.tsx';
 import { ProjectLayout } from '../layouts/ProjectLayout.tsx';
-import ProjectCreate from '../pages/app/ProjectCreate.tsx';
+import ProjectCreate from '../pages/app/ProjectCreate.tsx'; 
 import ProjectsPage from '../pages/app/ProjectsPage';
 import ProjectDetailPage from '../pages/app/ProjectDetailPage.tsx';
 import MyTasksPage from '../pages/app/MyTasksPage';
+import Search from '../pages/Search.tsx';
 import TeamPage from '../pages/app/TeamPage';
 import SettingsPage from '../pages/app/SettingsPage';
 import ProfilePage from '../pages/app/ProfilePage.tsx';
@@ -18,9 +19,10 @@ import ProjectPlaceholderPage from '../pages/app/ProjectPlaceholderPage';
 import Invite from '../pages/app/Invite.tsx';
 import AcceptInvite from '../pages/app/AcceptInvite.tsx';
 import AuthGuard from './guards/AuthGuard';
-import RoleGuard from './guards/RoleGuard'; 
+import RoleGuard from './guards/RoleGuard';
 import IssueDetailPage from '../pages/app/IssueDetailPage.tsx';
- 
+import SearchRouteWrapper from '../components/SearchRouteWrapper';
+
 import { BacklogPage } from '../pages/scrum/BacklogPage.tsx';
 import { ActiveBoardPage } from '../pages/scrum/ActiveBoardPage.tsx';
 import { Provider } from 'react-redux';
@@ -93,7 +95,7 @@ export const AppRoutes = () => {
               {/* Standard Project Routes */}
               <Route path="/projects/:projectId/issues" element={<IssueBoard />} />
               <Route path="/project/:projectId/issue/:issueId" element={<IssueDetailPage />} />
-              <Route path="/projects/:projectId/search" element={<ProjectPlaceholderPage title="Search" description="Search issues, docs, and project activity from the active workspace." badge="Find" icon={Search} />} />
+              <Route path="/projects/:projectId/search" element={<SearchRouteWrapper/>} />
               <Route path="/projects/:projectId/wiki" element={<ProjectPlaceholderPage title="Project Wiki" description="Keep project documentation, notes, and process details in one place." badge="Wiki" icon={NotebookPen} />} />
               <Route path="/projects/:projectId/team" element={<TeamPage />} />
               <Route path="/my-tasks" element={<MyTasksPage />} />
