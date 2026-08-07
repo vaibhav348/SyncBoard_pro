@@ -185,7 +185,7 @@ const taskCounts = useMemo(() => ({
 
   // ── Sprint progress statistics ────────────────────────────
   const isDone = (s: BoardStory) =>
-    ['done', 'closed'].includes(s.status?.toLowerCase() ?? '');
+    (s.totalTasks ?? 0) > 0 && s.doneTasks === s.totalTasks;
 
   const totalPoints = stories.reduce((sum, s) => sum + (s.storyPoints ?? 0), 0);
   const closedCount = stories.filter(isDone).length;
@@ -487,9 +487,9 @@ const taskCounts = useMemo(() => ({
         <SprintCompleteModal
           sprint={sprint}
           targetSprints={sprints}
-          completedCount={stories.filter((story) => ['Done', 'done', 'Closed', 'closed'].includes(String(story.status ?? ''))).length}
-          incompleteCount={stories.filter((story) => !['Done', 'done', 'Closed', 'closed'].includes(String(story.status ?? ''))).length}
-          isSubmitting={sprintActionLoading}
+          completedCount={stories.filter(isDone).length}
+incompleteCount={stories.filter((story) => !isDone(story)).length}
+ isSubmitting={sprintActionLoading}
           onClose={() => setShowCompleteModal(false)}
           onConfirm={handleCompleteSprint}
         />

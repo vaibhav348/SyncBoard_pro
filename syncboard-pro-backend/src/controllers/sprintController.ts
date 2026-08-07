@@ -36,9 +36,47 @@ const UpdateSprintSchema = z.object({
    endDate: z.coerce.date().optional()
 }).strict();
 
+const DONE_STATUSES = ["Done", "done", "Completed", "completed", "Closed", "closed"];
+
 const getIncompleteStatusFilter = () => ({
-   status: { $nin: ["Done", "done", "Completed", "completed", "Closed", "closed"] as string[] }
+   status: { $nin: DONE_STATUSES as string[] }
 }) as Record<string, any>;
+
+// UserStory has no `status` field of its own — a story counts as "done" only when
+// it has at least one task and every one of those tasks is in a Done-like status.
+// This mirrors the frontend's isDone() check in ActiveBoardPage.tsx.
+const getIncompleteStoryIds = async (
+   sprintObjectId: mongoose.Types.ObjectId,
+   session: mongoose.ClientSession
+): Promise<mongoose.Types.ObjectId[]> => {
+   const stories = await UserStory.find({ sprintId: sprintObjectId }, { _id: 1 }).session(session);
+   if (stories.length === 0) return [];
+
+   const storyIds = stories.map((s) => s._id);
+
+   const taskCounts = await Task.aggregate([
+       { $match: { storyId: { $in: storyIds } } },
+       {
+           $group: {
+               _id: "$storyId",
+               total: { $sum: 1 },
+               done: { $sum: { $cond: [{ $in: ["$status", DONE_STATUSES] }, 1, 0] } }
+           }
+       }
+   ]).session(session);
+
+   const countsByStory = new Map<string, { total: number; done: number }>(
+       taskCounts.map((c: any) => [String(c._id), { total: c.total, done: c.done }])
+   );
+
+   return storyIds.filter((id) => {
+       const counts = countsByStory.get(String(id));
+       const total = counts?.total ?? 0;
+       const done = counts?.done ?? 0;
+       const isStoryDone = total > 0 && done === total;
+       return !isStoryDone;
+   });
+};
 
 const resolveUserId = (user: any) => user?._id ?? user?.id ?? null;
 
@@ -285,24 +323,25 @@ export const completeSprint = async (req: Request, res: Response) => {
            const rolloverValue = rolloverTargetId ? new mongoose.Types.ObjectId(rolloverTargetId) : null;
 
            const incompleteFilter = getIncompleteStatusFilter();
+const incompleteStoryIds = await getIncompleteStoryIds(sprint._id as mongoose.Types.ObjectId, session);
 
-           const [tasksResult, issuesResult, storiesResult] = await Promise.all([
-               Task.updateMany(
-                   { sprintId: sprint._id, ...incompleteFilter },
-                   { $set: { sprintId: rolloverValue } },
-                   { session }
-               ),
-               Issue.updateMany(
-                   { sprintId: sprint._id, ...incompleteFilter },
-                   { $set: { sprintId: rolloverValue } },
-                   { session }
-               ),
-               UserStory.updateMany(
-                   { sprintId: sprint._id, ...incompleteFilter },
-                   { $set: { sprintId: rolloverValue } },
-                   { session }
-               )
-           ]);
+const [tasksResult, issuesResult, storiesResult] = await Promise.all([
+    Task.updateMany(
+        { sprintId: sprint._id, ...incompleteFilter },
+        { $set: { sprintId: rolloverValue } },
+        { session }
+    ),
+    Issue.updateMany(
+        { sprintId: sprint._id, ...incompleteFilter },
+        { $set: { sprintId: rolloverValue } },
+        { session }
+    ),
+    UserStory.updateMany(
+        { sprintId: sprint._id, _id: { $in: incompleteStoryIds } },
+        { $set: { sprintId: rolloverValue } },
+        { session }
+    )
+]);
 
            await session.commitTransaction();
            session.endSession();
