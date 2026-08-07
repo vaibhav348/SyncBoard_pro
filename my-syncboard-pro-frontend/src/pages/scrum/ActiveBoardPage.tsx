@@ -21,7 +21,7 @@ import SprintSettingsModal from '../../components/scrum/SprintSettingsModal';
 import { BoardHeader } from '../../components/scrum/userStory/BoardHeader';
 import { BoardStoryRow } from '../../components/scrum/userStory/BoardStoryRow';
 import { SprintIssuesTable } from '../../components/scrum/userStory/SprintIssuesTable';
-import type { ISprint } from '../../types/scrum.types';
+import type { ISprint, ITask } from '../../types/scrum.types';
 import type { BoardStory, TaskStatus } from '../../types/Board.types';
 import axiosInstance from '../../api/axiosInstance';
 import CreateIssuePage from '../app/CreateIssuePage';
@@ -86,27 +86,27 @@ export const ActiveBoardPage = () => {
 
   // ── Resolve which sprint to display ─────────────────────
   const sprintIdFromUrl = new URLSearchParams(location.search).get('sprintId');
-const sprint = sprintIdFromUrl
-  ? sprints.find(s => s._id === sprintIdFromUrl)
-  : sprints.find(s => s.status === 'active');
+  const sprint = sprintIdFromUrl
+    ? sprints.find(s => s._id === sprintIdFromUrl)
+    : sprints.find(s => s.status === 'active');
 
-// ✅ ADD THIS: jo bhi sprint resolve hua (URL se), usko turant activeSprint se sync karo,
-// taaki refresh/direct-URL/navigation ke baad bhi activeSprint kabhi stale/null na rahe.
-useEffect(() => {
-  if (sprint) {
-    dispatch(setActiveSprint(sprint));
-  }
-}, [sprint?._id, dispatch]);
+  // ✅ ADD THIS: jo bhi sprint resolve hua (URL se), usko turant activeSprint se sync karo,
+  // taaki refresh/direct-URL/navigation ke baad bhi activeSprint kabhi stale/null na rahe.
+  useEffect(() => {
+    if (sprint) {
+      dispatch(setActiveSprint(sprint));
+    }
+  }, [sprint?._id, dispatch]);
 
-const canManageCurrentSprint = Boolean(canManageSprint(currentUser as any, activeProject.data as any, sprint as any));
-const taskCounts = useMemo(() => ({
-  total: activeSprintTasks.length,
-  completed: activeSprintTasks.filter((task) => ['Done', 'done', 'Completed', 'completed', 'Closed', 'closed'].includes(String(task.status))).length,
-  inProgress: activeSprintTasks.filter((task) => ['In-Progress', 'in-progress'].includes(String(task.status))).length,
-  todo: activeSprintTasks.filter((task) => ['Todo', 'todo'].includes(String(task.status))).length,
-}), [activeSprintTasks]);
+  const canManageCurrentSprint = Boolean(canManageSprint(currentUser as any, activeProject.data as any, sprint as any));
+  const taskCounts = useMemo(() => ({
+    total: activeSprintTasks.length,
+    completed: activeSprintTasks.filter((task) => ['Done', 'done', 'Completed', 'completed', 'Closed', 'closed'].includes(String(task.status))).length,
+    inProgress: activeSprintTasks.filter((task) => ['In-Progress', 'in-progress'].includes(String(task.status))).length,
+    todo: activeSprintTasks.filter((task) => ['Todo', 'todo'].includes(String(task.status))).length,
+  }), [activeSprintTasks]);
 
- 
+
   // ── Fetch sprints and their stories on mount ─────────────
   useEffect(() => {
     const projectId = activeProject.data?._id;
@@ -120,56 +120,56 @@ const taskCounts = useMemo(() => ({
     });
   }, [dispatch, activeProject.data?._id]);
 
- const fetchSprintTasks = async (sprintId: string) => {
-   try {
-     const res = await axiosInstance.get(`/task/get_by_sprint/${sprintId}`);
-     const tasks = res.data.tasks || res.data;
+  const fetchSprintTasks = async (sprintId: string) => {
+    try {
+      const res = await axiosInstance.get(`/task/get_by_sprint/${sprintId}`);
+      const tasks = res.data.tasks || res.data;
 
-     dispatch(setActiveSprintTasks(tasks));
+      dispatch(setActiveSprintTasks(tasks));
 
-     if (Array.isArray(tasks)) {
-       const grouped: Record<string, any[]> = {};
+      if (Array.isArray(tasks)) {
+        const grouped: Record<string, any[]> = {};
 
-       tasks.forEach((t) => {
-         const realStoryId = typeof t.storyId === 'object' && t.storyId?._id
-           ? t.storyId._id
-           : t.storyId;
+        tasks.forEach((t) => {
+          const realStoryId = typeof t.storyId === 'object' && t.storyId?._id
+            ? t.storyId._id
+            : t.storyId;
 
-         if (realStoryId) {
-           if (!grouped[realStoryId]) grouped[realStoryId] = [];
-           grouped[realStoryId].push(t);
-         }
-       });
+          if (realStoryId) {
+            if (!grouped[realStoryId]) grouped[realStoryId] = [];
+            grouped[realStoryId].push(t);
+          }
+        });
 
-       Object.entries(grouped).forEach(([storyId, storyTasks]) => {
-         dispatch(setTasksByStory({ storyId, tasks: storyTasks }));
-       });
-     }
-   } catch (err) {
-     console.error('Failed to fetch tasks:', err);
-   }
- };
+        Object.entries(grouped).forEach(([storyId, storyTasks]) => {
+          dispatch(setTasksByStory({ storyId, tasks: storyTasks }));
+        });
+      }
+    } catch (err) {
+      console.error('Failed to fetch tasks:', err);
+    }
+  };
 
- const fetchSprintIssues = async (sprintId: string) => {
-   try {
-     const res = await axiosInstance.get(`/issue/get_by_sprint/${sprintId}`);
-     setIssues(res.data.issues || res.data);
-   } catch (err) {
-     console.error('Failed to fetch issues:', err);
-   }
- };
+  const fetchSprintIssues = async (sprintId: string) => {
+    try {
+      const res = await axiosInstance.get(`/issue/get_by_sprint/${sprintId}`);
+      setIssues(res.data.issues || res.data);
+    } catch (err) {
+      console.error('Failed to fetch issues:', err);
+    }
+  };
 
- // ── Fetch tasks for the current sprint ───────────────────
- useEffect(() => {
-   if (!sprint?._id) return;
-   fetchSprintTasks(sprint._id);
- }, [sprint?._id, dispatch]);
+  // ── Fetch tasks for the current sprint ───────────────────
+  useEffect(() => {
+    if (!sprint?._id) return;
+    fetchSprintTasks(sprint._id);
+  }, [sprint?._id, dispatch]);
 
- // ── Fetch issues for the current sprint ───────────────
- useEffect(() => {
-   if (!sprint?._id) return;
-   fetchSprintIssues(sprint._id);
- }, [sprint?._id]);
+  // ── Fetch issues for the current sprint ───────────────
+  useEffect(() => {
+    if (!sprint?._id) return;
+    fetchSprintIssues(sprint._id);
+  }, [sprint?._id]);
 
   // ── Stories for the current sprint (already in Redux) ────
   const stories = (sprint ? storiesBySprint[sprint._id] ?? [] : []) as BoardStory[];
@@ -183,10 +183,20 @@ const taskCounts = useMemo(() => ({
     );
   }, [stories, searchQuery]);
 
-  // ── Sprint progress statistics ────────────────────────────
-  const isDone = (s: BoardStory) =>
-    (s.totalTasks ?? 0) > 0 && s.doneTasks === s.totalTasks;
-
+  // NOTE: task.storyId is NOT always a plain id string — getTasksBySprint (the
+  // fetch used on page load/refresh) populates it as { _id, title, storyPoints },
+  // while updateTask's response (used after drag-and-drop) leaves it as a raw id.
+  // Same inconsistency handleUpdateTaskStatus already normalizes below — reuse
+  // that pattern here so freshly-loaded and just-dragged tasks compare equally.
+  const DONE_STATUSES = ['Done', 'done', 'Completed', 'completed', 'Closed', 'closed'];
+  const getTaskStoryId = (t: ITask) => {
+    const raw = t.storyId as any;
+    return typeof raw === 'object' && raw !== null ? raw._id : raw;
+  };
+  const isDone = (s: BoardStory) => {
+    const storyTasks = activeSprintTasks.filter(t => String(getTaskStoryId(t)) === String(s._id));
+    return storyTasks.length > 0 && storyTasks.every(t => DONE_STATUSES.includes(t.status));
+  };
   const totalPoints = stories.reduce((sum, s) => sum + (s.storyPoints ?? 0), 0);
   const closedCount = stories.filter(isDone).length;
   const completedPoints = stories.filter(isDone).reduce((sum, s) => sum + (s.storyPoints ?? 0), 0);
@@ -347,6 +357,16 @@ const taskCounts = useMemo(() => ({
       const updatedSprint = response.data.sprint || response.data;
       dispatch(updateSprintStatus(updatedSprint));
 
+      // Refetch this sprint's own stories — without this, `stories` (and every
+      // count/row derived from it) keeps showing the pre-completion list, since
+      // only tasks/issues/backlog/sprints were being refreshed below.
+      await dispatch(fetchStoriesBySprintAsync(sprint._id));
+
+      if (payload.moveIncompleteTo === 'sprint' && payload.targetSprintId) {
+        await dispatch(fetchStoriesBySprintAsync(payload.targetSprintId));
+      }
+
+      
       if (activeProject.data?._id) {
         await dispatch(fetchBacklogStoriesAsync(activeProject.data._id));
         await dispatch(fetchSprintsAsync(activeProject.data._id));
@@ -488,8 +508,8 @@ const taskCounts = useMemo(() => ({
           sprint={sprint}
           targetSprints={sprints}
           completedCount={stories.filter(isDone).length}
-incompleteCount={stories.filter((story) => !isDone(story)).length}
- isSubmitting={sprintActionLoading}
+          incompleteCount={stories.filter((story) => !isDone(story)).length}
+          isSubmitting={sprintActionLoading}
           onClose={() => setShowCompleteModal(false)}
           onConfirm={handleCompleteSprint}
         />

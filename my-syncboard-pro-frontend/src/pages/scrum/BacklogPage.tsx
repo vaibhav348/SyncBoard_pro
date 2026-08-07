@@ -284,7 +284,7 @@ export const BacklogPage = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-xl font-semibold tracking-tight text-black">Backlog</h1>
-              <p className="text-xs text-zinc-400 mt-0.5">{backlogStories.length} user stories in repository</p>
+              <p className="text-xs text-zinc-600 mt-0.5">{backlogStories.length} user stories in repository</p>
             </div>
             {canCreateStory && (
               <button
@@ -326,7 +326,7 @@ export const BacklogPage = () => {
               <span className="font-mono text-[11px] font-bold uppercase tracking-widest text-zinc-200">
                 Backlog Items
               </span>
-              <span className="text-[10px] text-zinc-500 font-mono hidden sm:block">
+              <span className="text-[10px] text-zinc-300 animate-pulse animate-infinite duration-1000 font-mono hidden sm:block">
                 Drag story here to remove from sprint
               </span>
             </div>
@@ -489,7 +489,7 @@ export const BacklogPage = () => {
                     <div className="bg-zinc-50/50 border-t border-zinc-100 p-2.5 space-y-1.5">
                       {sprintStories.length === 0 ? (
                         <div className="border border-dashed border-zinc-200 rounded-lg p-4 text-center bg-white">
-                          <p className="text-[11px] text-zinc-400">Drag a backlog story here to plan it</p>
+                          <p className="text-[11px] text-zinc-700 animate-pulse animate-infinite duration-1000 ">Drag a backlog story here to plan it</p>
                         </div>
                       ) : (
                         sprintStories.map((story) => (
