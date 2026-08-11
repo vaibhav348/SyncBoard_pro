@@ -93,7 +93,7 @@ const InviteMemberModal = ({ isOpen, onClose, onInvite }: Props) => {
         <button
           type="submit"
           disabled={submitting}
-          className="w-full bg-zinc-900 text-white font-medium text-sm py-3 rounded-xl shadow-sm hover:bg-zinc-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full cursor-pointer bg-zinc-900 text-white font-medium text-sm py-3 rounded-xl shadow-sm hover:bg-zinc-700 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {submitting ? 'Sending...' : 'Send invitation'}
         </button>

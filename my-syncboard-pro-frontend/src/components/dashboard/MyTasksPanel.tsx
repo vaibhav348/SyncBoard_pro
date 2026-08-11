@@ -10,10 +10,13 @@ const statusDot: Record<IssueSummary['status'], string> = {
   'done':        '#22c55e',
 };
 
+const CARD =
+  'rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-16px_rgba(15,23,42,0.10)] transition-shadow duration-300 hover:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_16px_40px_-16px_rgba(15,23,42,0.14)]';
+
 const MyIssuesPanel = ({ issues }: { issues: IssueSummary[] }) => {
   if (issues.length === 0) {
     return (
-      <div className="rounded-2xl border border-zinc-200 bg-white p-5">
+      <div className={`${CARD} p-5`}>
         <EmptyState
           icon={<CheckCircle2 size={18} />}
           title="No issues assigned"
@@ -26,40 +29,40 @@ const MyIssuesPanel = ({ issues }: { issues: IssueSummary[] }) => {
   }
 
   return (
-    <div className="rounded-2xl border border-zinc-200 bg-white p-5">
-      <div className="mb-4 flex items-center justify-between">
-        <div>
-          <h2 className="text-sm font-semibold text-zinc-900">My work</h2>
-          <p className="mt-0.5 text-xs text-zinc-500">Issues assigned to you</p>
+    <div className={CARD}>
+      <div className="flex items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/60 px-6 py-4.5">
+        <div className="flex items-center gap-3">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+            <CheckCircle2 size={18} />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-slate-900">My work</h2>
+            <p className="text-xs text-slate-400">Issues assigned to you</p>
+          </div>
         </div>
-        <Link
-          to="/my-tasks"
-          className="text-xs font-medium text-zinc-500 hover:text-zinc-900 transition-colors"
-        >
-          View all
-        </Link>
+        
       </div>
 
-      <div className="space-y-2 max-h-[420px] overflow-y-auto pr-1 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-zinc-200 hover:[&::-webkit-scrollbar-thumb]:bg-zinc-300 [&::-webkit-scrollbar-thumb]:rounded-full">
+      <div className="max-h-[420px] space-y-2 overflow-y-auto p-5 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-200 hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
         {issues.map((t) => {
           const content = (
             <>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   {t.issueKey && (
-                    <span className="font-mono text-[10px] text-zinc-400 shrink-0 uppercase">
+                    <span className="shrink-0 font-mono text-[10px] uppercase text-slate-400">
                       #{t.issueKey}
                     </span>
                   )}
-                  <p className="text-sm font-medium text-zinc-900 truncate">{t.title}</p>
+                  <p className="truncate text-sm font-medium text-slate-900">{t.title}</p>
                 </div>
-                <p className="text-xs text-zinc-400 mt-0.5">{t.projectName}</p>
+                <p className="mt-0.5 text-xs text-slate-400">{t.projectName}</p>
               </div>
 
               {/* Semantic dot + monochrome badge */}
-              <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-wide px-2 py-1 rounded-sm border border-zinc-200 bg-white text-zinc-600 shrink-0">
+              <div className="flex shrink-0 items-center gap-1.5 rounded-full border border-slate-200 bg-white px-2.5 py-1 font-mono text-[10px] uppercase tracking-wide text-slate-600">
                 <span
-                  className="w-1.5 h-1.5 rounded-full shrink-0"
+                  className="h-1.5 w-1.5 shrink-0 rounded-full"
                   style={{ backgroundColor: statusDot[t.status] }}
                 />
                 {t.status.replace('-', ' ')}
@@ -73,7 +76,7 @@ const MyIssuesPanel = ({ issues }: { issues: IssueSummary[] }) => {
                 key={t.id}
                 to={`/project/${t.projectId}/issue/${t.id}`}
                 state={{ returnTo: '/dashboard' }}
-                className="flex items-center justify-between gap-3 rounded-xl border border-zinc-100 bg-zinc-50/60 px-4 py-3 transition-colors hover:border-zinc-300 hover:bg-zinc-50"
+                className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3.5 transition-colors hover:border-slate-300 hover:bg-white"
               >
                 {content}
               </Link>
@@ -83,7 +86,7 @@ const MyIssuesPanel = ({ issues }: { issues: IssueSummary[] }) => {
           return (
             <div
               key={t.id}
-              className="flex items-center justify-between gap-3 rounded-xl border border-zinc-100 bg-zinc-50/60 px-4 py-3"
+              className="flex items-center justify-between gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-4 py-3.5"
             >
               {content}
             </div>

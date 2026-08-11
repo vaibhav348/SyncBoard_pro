@@ -1,4 +1,3 @@
-
 import { Request, Response, NextFunction } from "express";
 import mongoose from "mongoose";
 import Task from "../models/Task";
@@ -17,7 +16,7 @@ const VALID_TYPES = ["all", "tasks", "stories", "sprints", "issues", "members"] 
 type SearchType = (typeof VALID_TYPES)[number];
 
 interface ProjectFilter {
-  project: mongoose.Types.ObjectId;
+  projectId: mongoose.Types.ObjectId;
 }
 
 export async function search(req: Request, res: Response, next: NextFunction): Promise<void> {
@@ -41,8 +40,9 @@ export async function search(req: Request, res: Response, next: NextFunction): P
       return;
     }
 
-    const pattern = new RegExp(escapeRegex(rawQuery), "i"); 
-    const projectFilter: ProjectFilter = { project: new mongoose.Types.ObjectId(projectIdString) };
+    const pattern = new RegExp(escapeRegex(rawQuery), "i");
+    // ✅ FIX: field name is `projectId` in Task/Sprint/Issue/UserStory models, not `project`
+    const projectFilter: ProjectFilter = { projectId: new mongoose.Types.ObjectId(projectIdString) };
 
     const wantsAll = type === "all";
 
@@ -71,10 +71,11 @@ export async function search(req: Request, res: Response, next: NextFunction): P
 function searchTasks(projectFilter: ProjectFilter, pattern: RegExp, limit: number) {
   return Task.find({
     ...projectFilter,
-    $or: [{ title: pattern }, { description: pattern }, { taskKey: pattern }],
+    $or: [{ title: pattern }, { description: pattern }],
   })
-    .select("title status priority assignee taskKey updatedAt")
-    .populate("assignee", "name avatarUrl")
+    // ✅ FIX: Task model has no `taskKey` field, and assignee field is `assignedTo`
+    .select("title status priority assignedTo updatedAt")
+    .populate("assignedTo", "name avatarUrl")
     .sort({ updatedAt: -1 })
     .limit(limit)
     .lean();
@@ -85,7 +86,8 @@ function searchStories(projectFilter: ProjectFilter, pattern: RegExp, limit: num
     ...projectFilter,
     $or: [{ title: pattern }, { description: pattern }],
   })
-    .select("title status points updatedAt")
+    // ✅ FIX: UserStory model field is `storyPoints`, not `points`
+    .select("title storyPoints updatedAt")
     .sort({ updatedAt: -1 })
     .limit(limit)
     .lean();
@@ -107,8 +109,10 @@ function searchIssues(projectFilter: ProjectFilter, pattern: RegExp, limit: numb
     ...projectFilter,
     $or: [{ title: pattern }, { description: pattern }, { issueKey: pattern }],
   })
+    // ✅ FIX: Issue model has no `reportedBy` field — using `createdBy` instead
+    // (swap to `assignedBy` if that's what should show as "reporter")
     .select("title status priority type issueKey updatedAt")
-    .populate("reportedBy", "name avatarUrl")
+    .populate("createdBy", "name avatarUrl")
     .sort({ updatedAt: -1 })
     .limit(limit)
     .lean();

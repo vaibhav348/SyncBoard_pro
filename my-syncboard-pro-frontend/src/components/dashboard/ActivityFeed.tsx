@@ -3,12 +3,20 @@ import { Activity } from 'lucide-react';
 import EmptyState from '../EmptyState';
 import type { ActivityItem } from '../../types/dashboard.types';
 
-const CARD = 'rounded-2xl border border-zinc-200/80 bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04),0_8px_24px_-12px_rgba(0,0,0,0.08)]';
+interface Props {
+  items: ActivityItem[];
+  /** Optional role accent for the icon tile — defaults to neutral slate. */
+  accentBg?: string;
+  accentText?: string;
+}
 
-const ActivityFeed = ({ items }: { items: ActivityItem[] }) => {
+const CARD =
+  'flex h-[600px] flex-col overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.04),0_12px_32px_-16px_rgba(15,23,42,0.10)] transition-shadow duration-300 hover:shadow-[0_1px_2px_rgba(15,23,42,0.04),0_16px_40px_-16px_rgba(15,23,42,0.14)]';
+
+const ActivityFeed = ({ items, accentBg = 'bg-slate-100', accentText = 'text-slate-700' }: Props) => {
   if (items.length === 0) {
     return (
-      <div className={`${CARD} p-5 h-[480px] flex flex-col`}>
+      <div className={`${CARD} h-[480px] p-5`}>
         <EmptyState
           icon={<Activity size={18} />}
           title="No activity yet"
@@ -19,31 +27,33 @@ const ActivityFeed = ({ items }: { items: ActivityItem[] }) => {
   }
 
   return (
-    <div className={`${CARD} p-5 h-[600px] flex flex-col`}>
-      <div className="mb-4 flex items-center justify-between shrink-0">
-        <div>
-          <h2 className="text-sm font-semibold text-zinc-900">Recent activity</h2>
-          <p className="mt-0.5 text-xs text-zinc-500">Latest updates from your workspace</p>
+    <div className={CARD}>
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-3 border-b border-slate-100 bg-slate-50/60 px-6 py-4.5">
+        <div className="flex items-center gap-3">
+          <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${accentBg} ${accentText}`}>
+            <Activity size={18} />
+          </div>
+          <div>
+            <h2 className="text-sm font-semibold text-slate-900">Recent activity</h2>
+            <p className="text-xs text-slate-400">Latest updates from your workspace</p>
+          </div>
         </div>
-        <span className="font-mono text-[10px] uppercase tracking-wide px-2 py-1 rounded-sm border border-zinc-200 bg-zinc-50 text-zinc-500">
-          Live
-        </span>
       </div>
 
-      <div className="flex-1 min-h-0 overflow-y-auto pr-1 space-y-2 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:bg-zinc-200 hover:[&::-webkit-scrollbar-thumb]:bg-zinc-300 [&::-webkit-scrollbar-thumb]:rounded-full">
+      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto p-5 [&::-webkit-scrollbar]:w-1 [&::-webkit-scrollbar-track]:bg-transparent [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-slate-200 hover:[&::-webkit-scrollbar-thumb]:bg-slate-300">
         {items.map((item) => {
           const inner = (
-            <>
-              <div className="mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-zinc-100 border border-zinc-200 text-[10px] font-semibold text-zinc-700 uppercase">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-slate-200 bg-slate-100 text-[10px] font-semibold uppercase text-slate-700">
                 {item.actorName.split(' ').map((p) => p[0]).slice(0, 2).join('')}
               </div>
-              <p className="text-xs leading-relaxed text-zinc-600 break-all">
-                <span className="font-medium text-zinc-900">{item.actorName}</span>{' '}
+              <p className="text-xs leading-relaxed text-slate-600 break-all">
+                <span className="font-medium text-slate-900">{item.actorName}</span>{' '}
                 {item.action}{' '}
-                <span className="font-medium text-zinc-900">{item.target}</span>
-                <span className="text-zinc-400"> · {item.timestamp}</span>
+                <span className="font-medium text-slate-900">{item.target}</span>
+                <span className="text-slate-400"> · {item.timestamp}</span>
               </p>
-            </>
+            </div>
           );
 
           if (item.projectId && item.issueId) {
@@ -52,7 +62,7 @@ const ActivityFeed = ({ items }: { items: ActivityItem[] }) => {
                 key={item.id}
                 to={`/project/${item.projectId}/issue/${item.issueId}`}
                 state={{ returnTo: '/dashboard' }}
-                className="flex items-start gap-3 rounded-xl border border-zinc-200 bg-zinc-50/10 px-3 py-2.5 text-sm transition-colors hover:border-zinc-300 hover:bg-zinc-50"
+                className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm transition-colors hover:border-slate-300 hover:bg-slate-50"
               >
                 {inner}
               </Link>
@@ -62,7 +72,7 @@ const ActivityFeed = ({ items }: { items: ActivityItem[] }) => {
           return (
             <div
               key={item.id}
-              className="flex items-start gap-3 rounded-xl border border-zinc-100 bg-zinc-50/60 px-3 py-2.5 text-sm"
+              className="flex items-start gap-3 rounded-xl border border-slate-100 bg-slate-50/60 px-3 py-2.5 text-sm"
             >
               {inner}
             </div>

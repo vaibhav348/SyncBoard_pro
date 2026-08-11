@@ -59,11 +59,11 @@ export const quickActionsByRole: Record<DashboardRole, QuickAction[]> = {
       to: '/invite',
       description: 'Add team members to your organization.'
     },
-    { 
-      label: 'Workspace settings', 
-      to: '/settings/workspace',
-      description: 'Configure organization settings and preferences.'
-    },
+    // { 
+    //   label: 'Workspace settings', 
+    //   to: '/settings/workspace',
+    //   description: 'Configure organization settings and preferences.'
+    // },
   ],
   manager: [
     { 

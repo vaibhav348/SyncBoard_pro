@@ -10,7 +10,7 @@ const roleStyles: Record<Role, string> = {
 
 const RoleBadge = ({ role }: { role: Role }) => (
   <span
-    className={`font-mono text-[10px] uppercase tracking-wide px-2.5 py-1 rounded-full border ${roleStyles[role]}`}
+    className={`font-mono text-[9px] uppercase tracking-wide px-2 py-0.5 rounded-full border ${roleStyles[role]}`}
   >
     {role}
   </span>

@@ -15,18 +15,23 @@ const Dashboard = () => {
   const data = useDashboardData();
 
   return (
-    <div className="h-full min-h-0 flex flex-col justify-start overflow-y-auto overflow-x-hidden bg-white px-4 pt-8 pb-10 sm:px-10 lg:px-20">
-      <div className="mx-auto flex w-full max-w-7xl flex-col gap-6">
+    <div className="h-full min-h-0 flex flex-col justify-start overflow-y-auto overflow-x-hidden bg-slate-50 px-4 pt-8 pb-14 sm:px-10 lg:px-20">
+      {/* Soft directional wash behind the header — quiet, not decorative for its own sake */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 h-72 bg-gradient-to-b from-white to-transparent" aria-hidden="true" />
+
+      <div className="relative mx-auto flex w-full max-w-7xl flex-col gap-8">
         <DashboardHeader userName={user?.name ?? ''} role={role} />
 
         {data.loading ? (
           <DashboardSkeleton />
         ) : data.error ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-5 flex items-start gap-3">
-            <AlertCircle size={18} className="text-red-600 shrink-0 mt-0.5" />
+          <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-5 shadow-sm">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100 text-red-600">
+              <AlertCircle size={18} />
+            </div>
             <div>
-              <p className="text-sm font-semibold text-red-800">Dashboard unavailable</p>
-              <p className="text-sm text-red-700 mt-1">{data.error}</p>
+              <p className="text-sm font-semibold text-red-900">Dashboard unavailable</p>
+              <p className="mt-1 text-sm leading-relaxed text-red-700">{data.error}</p>
             </div>
           </div>
         ) : (

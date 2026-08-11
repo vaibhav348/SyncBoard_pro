@@ -11,22 +11,33 @@ interface Props {
   data: UseDashboardDataResult;
 }
 
+// Employee / developer role accent: emerald
+const ICON_CLASS = 'text-emerald-600';
+
 const DeveloperDashboard = ({ data }: Props) => {
   const metrics: Metric[] = data.metricsForEmployee.map((m, i) => ({
     ...m,
-    icon: [<CheckCircle2 size={16} key="a" />, <Target size={16} key="s" />, <Layers size={16} key="p" />][i],
+    icon: [
+      <CheckCircle2 size={16} key="a" className={ICON_CLASS} />,
+      <Target size={16} key="s" className={ICON_CLASS} />,
+      <Layers size={16} key="p" className={ICON_CLASS} />,
+    ][i],
   }));
 
   return (
     <>
-      <MetricsGrid metrics={metrics} />
+     <div className="flex flex-wrap items-stretch gap-4">
+  <MetricsGrid metrics={metrics} />
+  <QuickActions actions={quickActionsByRole.employee} />
+</div>
+ 
+
       <section className="grid gap-6 xl:grid-cols-[1.35fr_0.85fr]">
         <div className="space-y-6">
           <MyIssuesPanel issues={data.myIssues} />
         </div>
         <div className="space-y-6">
-          <QuickActions actions={quickActionsByRole.employee} />
-          <ActivityFeed items={data.activity} />
+          <ActivityFeed items={data.activity} accentBg="bg-emerald-50" accentText="text-emerald-600" />
         </div>
       </section>
     </>

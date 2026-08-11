@@ -56,7 +56,7 @@ const Sidebar = () => {
   const bottomNavItems = useMemo(
     () => [
       { name: 'Search', path: `${projectBasePath}/search`, icon: Search },
-      { name: 'Wiki', path: `${projectBasePath}/wiki`, icon: BookOpenText },
+      
       { name: 'Team', path: `${projectBasePath}/team`, icon: Users },
     ],
     [projectBasePath]

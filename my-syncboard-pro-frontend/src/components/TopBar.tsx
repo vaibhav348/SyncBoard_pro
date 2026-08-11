@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { Bell, ChevronDown, Plus, Search, FolderKanban, FolderPlus, UserPlus, BellOff } from 'lucide-react';
+import { Bell, ChevronDown, Plus, FolderKanban, FolderPlus, UserPlus, BellOff } from 'lucide-react';
 import { useAppSelector } from '../hooks/storeHooks';
 import { normalizeRole } from '../config/permissions';
 import logo from "../assets/logow.png";
@@ -98,18 +98,9 @@ const NotificationsMenu = () => {
 const TopBar = () => {
   const { user } = useAppSelector((state) => state.auth);
   const [isProjectOpen, setIsProjectOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState('');
-  const navigate = useNavigate();
 
   const role = normalizeRole(user?.role);
   const canManage = role === 'owner' || role === 'manager';
-
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    const q = searchQuery.trim();
-    if (!q) return;
-    navigate(`/projects?q=${encodeURIComponent(q)}`);
-  };
 
   return (
     <header className="relative z-40 flex h-16 shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-4 sm:px-5 shadow-sm">
@@ -132,29 +123,7 @@ const TopBar = () => {
         <ProjectDropdown isOpen={isProjectOpen} onClose={() => setIsProjectOpen(false)} />
       </div>
 
-      <div className="flex flex-1 justify-center mx-4">
-        <form onSubmit={handleSearchSubmit} className="w-full max-w-md">
-          <label className="flex w-full items-center gap-3 rounded-xl border border-zinc-200 bg-zinc-50 px-3 py-2 text-sm text-zinc-600 shadow-sm focus-within:border-zinc-400 focus-within:bg-white transition-colors duration-200">
-            <Search size={16} className="text-zinc-400 shrink-0" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search projects..."
-              className="w-full bg-transparent text-zinc-800 placeholder-zinc-400 focus:outline-none"
-            />
-            {searchQuery && (
-              <button
-                type="button"
-                onClick={() => setSearchQuery('')}
-                className="text-zinc-400 hover:text-zinc-600 text-sm leading-none shrink-0"
-              >
-                ×
-              </button>
-            )}
-          </label>
-        </form>
-      </div>
+      <div className="flex-1" />
 
       <div className="flex items-center gap-2 sm:gap-3">
         <NewMenu canManage={canManage} />

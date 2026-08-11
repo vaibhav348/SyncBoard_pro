@@ -15,6 +15,9 @@ interface Props {
   data: UseDashboardDataResult;
 }
 
+// Manager role accent: amber
+const ICON_CLASS = 'text-amber-600';
+
 const ManagerDashboard = ({ data }: Props) => {
   const { sprints, storiesBySprint } = useAppSelector((state) => state.scrum);
 
@@ -35,7 +38,11 @@ const ManagerDashboard = ({ data }: Props) => {
 
   const metrics: Metric[] = data.metricsForManager.map((m, i) => ({
     ...m,
-    icon: [<Layers size={16} key="s" />, <CheckCircle2 size={16} key="i" />, <Users size={16} key="t" />][i],
+    icon: [
+      <Layers size={16} key="s" className={ICON_CLASS} />,
+      <CheckCircle2 size={16} key="i" className={ICON_CLASS} />,
+      <Users size={16} key="t" className={ICON_CLASS} />,
+    ][i],
   }));
 
   return (
@@ -48,7 +55,7 @@ const ManagerDashboard = ({ data }: Props) => {
         </div>
         <div className="space-y-6">
           <QuickActions actions={quickActionsByRole.manager} />
-          <ActivityFeed items={data.activity} />
+          <ActivityFeed items={data.activity} accentBg="bg-amber-50" accentText="text-amber-600" />
         </div>
       </section>
     </>

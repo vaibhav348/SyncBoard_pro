@@ -29,7 +29,7 @@ const Modal = ({ isOpen, onClose, title, children }: Props) => {
             className="text-zinc-500 hover:text-text-h transition-colors"
             aria-label="Close"
           >
-            <X size={18} />
+            <X size={18} className='hover:text-black cursor-pointer' />
           </button>
         </div>
         <div className="p-5">{children}</div>
