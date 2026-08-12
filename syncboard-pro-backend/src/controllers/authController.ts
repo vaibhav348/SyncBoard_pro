@@ -83,6 +83,7 @@ export const registerUser = async (req: Request, res: Response) => {
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
+        const avatarUrl = req.file ? (req.file as any).path : undefined;
 
         const newUser = await User.create({
             name,
@@ -92,7 +93,8 @@ export const registerUser = async (req: Request, res: Response) => {
             role: finalRole,
             department: department || undefined,
             title: title || (finalRole === 'owner' ? 'Company Owner' : 'Team Member'),
-            companyId: finalCompanyId as any
+            companyId: finalCompanyId as any,
+            avatarUrl 
         });
 
         const token = jwt.sign(
@@ -199,6 +201,7 @@ export const LoginUser = async (req: Request, res: Response) => {
 export const updateProfile = async (req: Request, res: Response) => {
     try {
         const userId = (req as any).user?.id;
+console.log("hi");
 
         if (!userId) {
             return res.status(401).json({ message: "Unauthorized" });
@@ -206,7 +209,7 @@ export const updateProfile = async (req: Request, res: Response) => {
 
         const UpdateProfileSchema = z.object({
             name: z.string().min(2, "Name should be at least 2 characters").optional(),
-            mobileNumber: z.number().optional(),
+            mobileNumber: z.coerce.number().optional(),   // 👈 coerce, since it comes from form-data now
             title: z.string().optional(),
             department: z.string().optional()
         });
@@ -218,13 +221,17 @@ export const updateProfile = async (req: Request, res: Response) => {
 
         const { name, mobileNumber, title, department } = validation.data;
 
+        // 👇 avatar is optional here — only present if the user picked a new photo
+        const avatarUrl = req.file ? (req.file as any).path : undefined;
+
         const updatedUser = await User.findByIdAndUpdate(
             userId,
             {
                 ...(name ? { name } : {}),
                 ...(mobileNumber !== undefined ? { mobileNumber } : {}),
                 ...(title !== undefined ? { title } : {}),
-                ...(department !== undefined ? { department } : {})
+                ...(department !== undefined ? { department } : {}),
+                ...(avatarUrl ? { avatarUrl } : {})
             },
             { new: true }
         ).select("-password");
@@ -242,7 +249,8 @@ export const updateProfile = async (req: Request, res: Response) => {
                 companyId: updatedUser.companyId,
                 mobileNumber: updatedUser.mobileNumber,
                 department: updatedUser.department,
-                title: updatedUser.title
+                title: updatedUser.title,
+                avatarUrl: updatedUser.avatarUrl   // 👈 add
             },
             process.env.JWT_SECRET as string,
             { expiresIn: '1d' }
@@ -257,7 +265,8 @@ export const updateProfile = async (req: Request, res: Response) => {
                 role: updatedUser.role,
                 mobileNumber: updatedUser.mobileNumber,
                 department: updatedUser.department,
-                title: updatedUser.title
+                title: updatedUser.title,
+                avatarUrl: updatedUser.avatarUrl   // 👈 add
             }
         });
     } catch (error) {
@@ -329,5 +338,66 @@ export const verifyInviteToken = async (req: Request, res: Response) => {
     } catch (error) {
         console.error("Error in verifyInviteToken:", error);
         return res.status(500).json({ message: "Server token check failed: " + error });
+    }
+};
+
+//------------------Upload Avatar------------------
+export const uploadAvatar = async (req: Request, res: Response) => {
+    try {
+        const userId = (req as any).user?.id;
+
+        if (!userId) {
+            return res.status(401).json({ message: "Unauthorized" });
+        }
+
+        if (!req.file) {
+            return res.status(400).json({ message: "Avatar file is missing bhai!" });
+        }
+
+        const avatarUrl = (req.file as any).path; // secure_url set by multer-storage-cloudinary
+
+        const updatedUser = await User.findByIdAndUpdate(
+            userId,
+            { avatarUrl },
+            { new: true }
+        ).select("-password");
+
+        if (!updatedUser) {
+            return res.status(404).json({ message: "User not found" });
+        }
+
+        const token = jwt.sign(
+            {
+                id: updatedUser._id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                role: updatedUser.role,
+                companyId: updatedUser.companyId,
+                mobileNumber: updatedUser.mobileNumber,
+                department: updatedUser.department,
+                title: updatedUser.title,
+                avatarUrl: updatedUser.avatarUrl
+            },
+            process.env.JWT_SECRET as string,
+            { expiresIn: '1d' }
+        );
+
+        return res.status(200).json({
+            message: "Avatar uploaded successfully!",
+            token,
+            user: {
+                name: updatedUser.name,
+                email: updatedUser.email,
+                role: updatedUser.role,
+                mobileNumber: updatedUser.mobileNumber,
+                department: updatedUser.department,
+                title: updatedUser.title,
+                avatarUrl: updatedUser.avatarUrl
+            }
+        });
+
+    } catch (error) {
+        console.error("Error in uploadAvatar:", error);
+        return res.status(500).json({ message: "Error while uploading avatar: " + error });
     }
 };

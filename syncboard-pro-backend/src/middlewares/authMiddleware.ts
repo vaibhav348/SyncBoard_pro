@@ -5,6 +5,8 @@ import jwt from "jsonwebtoken";
 
 export const protect = async (req: Request, res: Response, next: NextFunction) => {
     let token;
+    console.log("----------------1-----------------");
+    
     if (req.headers.authorization && req.headers.authorization.startsWith("Bearer")) {
         try {
             token = req.headers.authorization.split(" ")[1];
@@ -12,6 +14,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction) =
             const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
 
             req.user = decoded as any;
+            console.log("----------------2-----------------");
 
             return next();
         } catch (error) {

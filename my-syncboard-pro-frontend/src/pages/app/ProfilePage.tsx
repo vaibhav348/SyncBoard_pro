@@ -105,14 +105,16 @@ const ProfilePage = () => {
     setSuccess(false);
 
     try {
-      const payload = {
-        name: formData.name.trim(),
-        mobileNumber: Number(formData.mobileNumber),
-        title: formData.title.trim(),
-        department: formData.department || undefined,
-      };
+      const form = new FormData();
+      form.append('name', formData.name.trim());
+      form.append('mobileNumber', formData.mobileNumber);
+      form.append('title', formData.title.trim());
+      if (formData.department) form.append('department', formData.department);
+      if (avatarFile) form.append('avatar', avatarFile);
 
-      const response = await axiosInstance.put('/auth/update-profile', payload);
+      const response = await axiosInstance.put('/auth/update-profile', form, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
 
       if (response.data?.token && response.data?.user) {
         dispatch(
@@ -128,15 +130,12 @@ const ProfilePage = () => {
           title: response.data.user.title ?? prev.title,
           department: (response.data.user.department as DepartmentOption | undefined) ?? prev.department,
         }));
+        if (response.data.user.avatarUrl) {
+          setAvatar(response.data.user.avatarUrl);
+        }
       }
 
-      // NOTE: avatarFile is captured client-side (preview works instantly), but there's
-      // no avatar-upload endpoint wired here yet. Once the backend exposes one
-      // (e.g. POST /auth/upload-avatar as multipart/form-data), send avatarFile there.
-      if (avatarFile) {
-        console.warn('Avatar selected but no upload endpoint is wired yet — preview only.');
-      }
-
+      setAvatarFile(null); // clear staged file after a successful save
       setSuccess(true);
       setTimeout(() => setSuccess(false), 3000);
     } catch (err: any) {
@@ -144,7 +143,7 @@ const ProfilePage = () => {
     } finally {
       setUpdating(false);
     }
-  };
+};
 
   return (
     <div className="h-full min-h-0 overflow-y-auto overflow-x-hidden bg-white px-4 py-8 sm:px-10">

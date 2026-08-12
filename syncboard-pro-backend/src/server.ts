@@ -64,6 +64,14 @@ app.use('/api/story-comment', storyCommentRoutes);
 app.post('/api/project/:id/members', protect, addProjectMember);
 app.post('/api/project/members/:id', protect, addProjectMember);
 
+
+// Catch-all error handler — must be LAST, after all routes
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  console.error("Unhandled error:", err);
+  return res.status(500).json({
+    message: err?.message || "Something went wrong on the server.",
+  });
+});
 app.listen(PORT, () => {
   console.log(`📡 SyncBoard Pro Server listening on port: ${PORT}`);
   console.log('   Routes ready:');
